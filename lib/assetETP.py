@@ -92,7 +92,99 @@ class ExchangeTradeProtocol():
         return topNAssets
 
     ''' Function
-            name: value_index
+            name: sharp_ratio
+            parameters:
+                    @name (str)
+                    @clean (dict)
+            procedure: 
+            return DataFrame
+    '''
+    def sharp_ratio(self, data_df, investment = 100, risk_free_rate=0.02, **params):
+
+        import traceback
+        import pandas as pd
+
+        avg_simple_returns = pd.Series()
+        std_simple_returns = pd.Series()
+        sharp_ratio = pd.Series()
+
+        try:
+            simple_returns = self.get_simple_returns(data_df)
+            _l_coin_ids = [col for col in simple_returns if col != 'Date']
+            avg_simple_returns = simple_returns[_l_coin_ids].mean()
+            std_simple_returns = simple_returns[_l_coin_ids].std()
+            risk_free_rate = avg_simple_returns['bitcoin']
+            print(risk_free_rate)
+            sharp_ratio = (avg_simple_returns - risk_free_rate) / std_simple_returns
+
+        except Exception as err:
+            _s_fn_id = "Class <ExchangeTradeProtocol> Function <sharp_ratio>"
+            print("[Error]"+_s_fn_id, err)
+            print(traceback.format_exc())
+
+        return sharp_ratio
+
+    ''' Function
+            name: sortino_ratio
+            parameters:
+                    @name (str)
+                    @clean (dict)
+            procedure: 
+            return DataFrame
+    '''
+    def sortino_ratio(self, data_df, investment = 100, risk_free_rate=0.02, **params):
+
+        import traceback
+        import pandas as pd
+
+        avg_simple_returns = pd.Series()
+        std_simple_returns = pd.Series()
+        sortino_ratio = pd.Series()
+
+        try:
+            simple_returns = self.get_simple_returns(data_df)
+            _l_coin_ids = [col for col in simple_returns if col != 'Date']
+            avg_simple_returns = simple_returns[_l_coin_ids].mean()
+            _down_simple_returns = simple_returns.copy()
+            _l_cols = [col for col in _down_simple_returns if col !='Date']
+            _down_simple_returns[_l_cols] = _down_simple_returns[_down_simple_returns[_l_cols] < 0][_l_cols]
+            std_simple_returns = _down_simple_returns[_l_coin_ids].std()
+            risk_free_rate = avg_simple_returns['bitcoin']
+            sortino_ratio = (avg_simple_returns - risk_free_rate) / std_simple_returns
+
+        except Exception as err:
+            _s_fn_id = "Class <ExchangeTradeProtocol> Function <sortino_ratio>"
+            print("[Error]"+_s_fn_id, err)
+            print(traceback.format_exc())
+
+        return sortino_ratio
+
+    ''' Function
+            name: weights_matrix
+            parameters:
+                    @name (str)
+                    @clean (dict)
+            procedure: 
+            return DataFrame
+    '''
+    def weights_matrix(self, N=3,S=10):
+
+        import numpy as np   #numpy.random
+        import traceback
+
+        try:
+            rand_arr = []
+            rand_arr.append(np.random.dirichlet(np.ones(N),size=S))
+
+        except Exception as err:
+            _s_fn_id = "Class <ExchangeTradeProtocol> Function <weights_matrix>"
+            print("[Error]"+_s_fn_id, err)
+            print(traceback.format_exc())
+
+        return np.around(rand_arr,4)
+
+    ''' Function
+            name: rolling_corr
             parameters:
                     @name (str)
                     @clean (dict)
