@@ -54,13 +54,12 @@ class ExchangeTradeProtocol():
         _l_coin_ids = [col for col in data_df.columns if col != 'Date']
         _min_dt = data_df['Date'].min()
         _max_dt = data_df['Date'].max()
-        print(_l_coin_ids,_min_dt,_max_dt)
-                          
-        hpr_df = (data_df[data_df['Date' == _max_dt]][_l_coin_ids] - \
-                 data_df[data_df['Date' == _min_dt]][_l_coin_ids]) / \
-                 data_df[data_df['Date' == _min_dt]][_l_coin_ids]
 
-        return hpr_df
+        curr_mcap = data_df[data_df['Date'] == _max_dt][_l_coin_ids]
+        orig_mcap = data_df[data_df['Date'] == _min_dt][_l_coin_ids]
+#        hpr_df = curr_mcap.iloc[0].sub(orig_mcap.iloc[0])
+
+        return (curr_mcap.iloc[0].sub(orig_mcap.iloc[0])).div(orig_mcap.iloc[0])
 
     ''' Function
             name: value_index
