@@ -64,6 +64,8 @@ class ExtractLoadTransform():
                 _tmp_df = pd.read_csv(_s_rel_path, index_col=False)
                 data_df = pd.concat([data_df,_tmp_df[columns]])
         data_df.reset_index(drop=True)
+        data_df['Date'] = data_df['Date'].astype('datetime64[ns]')
+        data_df['market_cap'] = data_df['market_cap'].astype('float64')
 
         return data_df
 

@@ -49,6 +49,27 @@ class ExchangeTradeProtocol():
             procedure: 
             return DataFrame
     '''
+    def get_holding_period_return(self, data_df):
+
+        _l_coin_ids = [col for col in data_df.columns if col != 'Date']
+        _min_dt = data_df['Date'].min()
+        _max_dt = data_df['Date'].max()
+        print(_l_coin_ids,_min_dt,_max_dt)
+                          
+        hpr_df = (data_df[data_df['Date' == _max_dt]][_l_coin_ids] - \
+                 data_df[data_df['Date' == _min_dt]][_l_coin_ids]) / \
+                 data_df[data_df['Date' == _min_dt]][_l_coin_ids]
+
+        return hpr_df
+
+    ''' Function
+            name: value_index
+            parameters:
+                    @name (str)
+                    @clean (dict)
+            procedure: 
+            return DataFrame
+    '''
     def get_simple_returns(self, data_df):
 
         _l_coin_ids = [col for col in data_df.columns if col != 'Date']
@@ -233,3 +254,28 @@ class ExchangeTradeProtocol():
             print(traceback.format_exc())
 
         return corr_matrix
+
+    ''' Function
+            name: rolling_corr
+            parameters:
+                    @name (str)
+                    @clean (dict)
+            procedure: 
+            return DataFrame
+    '''
+    def __main__(self, start_dt, end_dt):
+
+        import pandas as pd
+        import datetime
+        from datetime import timedelta, date
+
+        try:
+            print('Under construction')
+
+        except Exception as err:
+            _s_fn_id = "Class <ExchangeTradeProtocol> Function <__main__>"
+            print("[Error]"+_s_fn_id, err)
+            print(traceback.format_exc())
+
+        return corr_matrix
+
