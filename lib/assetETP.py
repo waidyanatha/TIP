@@ -28,38 +28,6 @@ class ExchangeTradeProtocol():
         return None
 
     ''' Function
-            name: weights_matrix
-            parameters:
-                    @name (str)
-                    @clean (dict)
-            procedure: 
-            return DataFrame
-    '''
-    def transpose_pivot(self, data_df):
-
-        import traceback
-        import pandas as pd
-        
-        transp_df = pd.DataFrame([], columns=['Date','ID','market_cap'])
-        _l_dates = data_df['Date'].unique()
-        _l_coin_ids = [col for col in data_df.columns if col !='Date']
-        try:
-            for date in _l_dates:
-                for coin_id in _l_coin_ids:
-                    value = data_df[data_df['Date'] == date][coin_id]
-                    transp_df = pd.concat([transp_df,
-                                           pd.DataFrame({'Date':date, 'ID':coin_id, 'market_cap':value})])
-            transp_df['Date'] = transp_df['Date'].astype('datetime64[ns]')
-            transp_df['market_cap'] = transp_df['market_cap'].astype('float64')
-
-        except Exception as err:
-            _s_fn_id = "Class <ExchangeTradeProtocol> Function <weights_matrix>"
-            print("[Error]"+_s_fn_id, err)
-            print(traceback.format_exc())
-
-        return transp_df
-
-    ''' Function
             name: get_expected_returns
             parameters:
                     @name (str)

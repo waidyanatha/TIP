@@ -109,3 +109,68 @@ class ExtractLoadTransform():
         market_df.loc[:,market_df.columns !='Date'] = market_df.loc[:,market_df.columns !='Date'].astype('float64')
 
         return market_df
+
+    ''' Function
+            name: weights_matrix
+            parameters:
+                    @name (str)
+                    @clean (dict)
+            procedure: 
+            return DataFrame
+    '''
+    def transpose_pivot(self, data_df):
+
+        import traceback
+        import pandas as pd
+        
+        transp_df = pd.DataFrame([], columns=['Date','ID','market_cap'])
+        _l_dates = data_df['Date'].unique()
+        _l_coin_ids = [col for col in data_df.columns if col !='Date']
+        try:
+            for date in _l_dates:
+                for coin_id in _l_coin_ids:
+                    value = data_df[data_df['Date'] == date][coin_id]
+                    transp_df = pd.concat([transp_df,
+                                           pd.DataFrame({'Date':date, 'ID':coin_id, 'market_cap':value})])
+            transp_df['Date'] = transp_df['Date'].astype('datetime64[ns]')
+            transp_df['market_cap'] = transp_df['market_cap'].astype('float64')
+
+        except Exception as err:
+            _s_fn_id = "Class <ExtractLoadTransform> Function <weights_matrix>"
+            print("[Error]"+_s_fn_id, err)
+            print(traceback.format_exc())
+
+        return transp_df
+
+    ''' Function
+            name: match_dataframes
+            parameters:
+                    @name (str)
+                    @clean (dict)
+            procedure: 
+            return DataFrame
+    '''
+    def match_dataframes(self, source_data_df, to_base_data_df):
+
+        import traceback
+        import pandas as pd
+
+        matching_df = pd.DataFrame([],columns=['Date','ID','Value'])
+
+        try:
+            _l_base_dates = to_base_data_df['Date'].unique()
+            for date in _l_base_dates:
+                coin_ids = to_base_data_df[to_base_data_df['Date']==date]['ID']
+                for c_id in coin_ids:
+                    mask = source_data_df['Date']==date & source_data_df['ID']==c_id
+                    print(mask)
+                    value = source_data_df[mask]['market_cap']
+                    matching_df = pd.concat([matching_df,
+                                             pd.DataFrame({'Date':date,'ID':c_id,'Value':value})])
+
+        except Exception as err:
+            _s_fn_id = "Class <ExchangeTradeProtocol> Function <match_dataframes>"
+            print("[Error]"+_s_fn_id, err)
+            print(traceback.format_exc())
+
+        return matching_df
