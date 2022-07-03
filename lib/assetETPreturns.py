@@ -8,6 +8,7 @@
 class RateOfReturns():
 
     import pandas as pd
+    import numpy as np
 
     ''' Function
             name: __init__
@@ -35,7 +36,10 @@ class RateOfReturns():
             procedure: 
             return DataFrame
     '''
-    def sum_weighted_returns(self, data_df : pd.DataFrame, weights, value_col_name = "value"):
+    def sum_weighted_returns(self, data_df : pd.DataFrame,
+                             weights : np.array,
+                             probability = 1.0,
+                             value_col_name = "value"):
 
         import traceback
         import pandas as pd
@@ -131,8 +135,64 @@ class RateOfReturns():
 
         return _log_return_df
 
-    ''' Function
+
+#    @staticmethod
+    ''' name: get_coin_cov_metric
+        description: applied only when the investments are layed over fixed period intervals.
+        parameters:
+            @name (str)
+            @clean (dict)
+        procedure: 
+        return list
+    '''
+    def get_coin_cov_metric(self,
+                            a_data_df: pd.DataFrame,     # first  dataframe, typically with the actual market cap values
+                            b_data_df: pd.DataFrame,     # second dataframe, typically with the market cap moving average
+                            suffix = ('_mean','_actual')     # suffix values for renaming the columns in the merge
+                           ):
+
+        import traceback
+        import pandas as pd
+        import numpy as np
+
+        _l_cov_dict = []    # return the dictionary of covariance
+
+        try:
+            if not (a_data_df.shape[0] > 0 and b_data_df.shape[0] > 0):
+                raise ValueError("One more of the dataframes has no data: dataframe a has %d and b has %d rows"
+                                 %(a_data_df.shape[0],b_data_df.shape[0]))
+
+            ''' merge the two dataframes, with inner join, to match the rows ''' 
+            _cov_df = pd.merge(a_data_df.dropna(axis=1, how='all', inplace=False),
+                               b_data_df.dropna(axis=1, how='all', inplace=False),
+                               how='inner', on=['Date'], suffixes=('_mean', '_actual'))
+            ''' extract the coind id columns from both dataframes '''
+            _l_coin_ids_a = [col for col in _cov_df if (col != 'Date' and '_actual' in col)]
+            _l_coin_ids_b = [col for col in _cov_df if (col != 'Date' and '_mean' in col)]
+            ''' prepare sets to find the intersection of the two lists for a common set of coin ids '''
+            _set_coin_ids_a = set([coin.replace('_actual','') for coin in _l_coin_ids_a])
+            ''' compute the covariance for each coin id '''
+            _set_coin_ids_b = set([coin.replace('_mean','') for coin in _l_coin_ids_b])
+            for coin in sorted(list(_set_coin_ids_b.intersection(_set_coin_ids_a)), reverse=False):
+                _coin_df = _cov_df.dropna(axis=0, how='any',subset=[coin+'_mean',coin+'_actual'])
+                _l_a_vals = _coin_df[coin+'_actual']
+                _l_b_vals = _coin_df[coin+'_mean']
+                _l_cov_dict.append({'id': coin,
+                                    'cov': np.cov(np.array([_l_a_vals,_l_b_vals]))[0][1],
+                                    'corcoef': np.corrcoef(np.array([_l_a_vals,_l_b_vals]))[0][1],
+                                    'var': np.cov(np.array([_l_a_vals,_l_b_vals]))[0][0]
+                                   })
+
+        except Exception as err:
+            _s_fn_id = "Class <RateOfReturns> Function <get_coin_cov_metric>"
+            print("[Error]"+_s_fn_id, err)
+            print(traceback.format_exc())
+
+        return _l_cov_dict
+
+    ''' Function [TBD] Phase II
             name: get_geometric_return
+            description: applied only when the investments are layed over fixed period intervals.
             parameters:
                     @name (str)
                     @clean (dict)
@@ -144,27 +204,13 @@ class RateOfReturns():
         import traceback
         import pandas as pd
         import numpy as np
-    ''' Function
-            name: rolling_corr
-            parameters:
-                    @name (str)
-                    @clean (dict)
-            procedure: 
-            return DataFrame
-    '''
-    def __main__(self, start_dt, end_dt):
-
-        import pandas as pd
-        import datetime
-        from datetime import timedelta, date
 
         try:
-            print('Under construction')
+            pass
 
         except Exception as err:
-            _s_fn_id = "Class <RateOfReturns> Function <__main__>"
+            _s_fn_id = "Class <RateOfReturns> Function <get_geometric_return>"
             print("[Error]"+_s_fn_id, err)
             print(traceback.format_exc())
 
-        return corr_matrix
-
+        return _log_return_df

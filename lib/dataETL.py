@@ -135,18 +135,29 @@ class ExtractLoadTransform():
             procedure: 
             return DataFrame
     '''
-    def rolling_mean(self, data_df, period=7):
+    def rolling_mean(self, data_df, period=7, value_col_name='Value'):
 
         import traceback
         import pandas as pd
+#        import numpy as np
 
         _rolling_mean = pd.DataFrame()
 
         try:
-            _l_coin_ids = [col for col in data_df if col !='Date']
-            _rolling_mean = data_df.copy()
-            _rolling_mean[_l_coin_ids] = _rolling_mean[_l_coin_ids].rolling(period).mean()
+            if not (data_df.shape[0] > 0):
+                raise ValueError("Invalid dataframe no records found!")
+
+            _l_coin_ids = data_df.ID.unique()
+            for c_id in _l_coin_ids:
+                coin_df = pd.DataFrame(data_df[data_df['ID']==c_id],columns = data_df.columns)
+                coin_df['rolling mean'] = coin_df[value_col_name].rolling(period).mean()
+                _rolling_mean = pd.concat([_rolling_mean,coin_df])
+
             _rolling_mean['Date'] = _rolling_mean['Date'].astype('datetime64[ns]')
+#            _l_coin_ids = [col for col in data_df if col !='Date']
+#            _rolling_mean = data_df.copy()
+#            _rolling_mean[_l_coin_ids] = _rolling_mean[_l_coin_ids].rolling(period).mean()
+#            _rolling_mean['Date'] = _rolling_mean['Date'].astype('datetime64[ns]')
 
         except Exception as err:
             _s_fn_id = "Class <ExchangeTradeProtocol> Function <rolling_mean>"
@@ -163,7 +174,7 @@ class ExtractLoadTransform():
             procedure: 
             return DataFrame
     '''
-    def rolling_stdv(self, data_df, period=7):
+    def rolling_stdv(self, data_df, period=7, value_col_name='Value'):
 
         import traceback
         import pandas as pd
@@ -171,10 +182,19 @@ class ExtractLoadTransform():
         _rolling_stdv = pd.DataFrame()
 
         try:
-            _l_coin_ids = [col for col in data_df if col !='Date']
-            _rolling_stdv = data_df.copy()
-            _rolling_stdv[_l_coin_ids] = _rolling_stdv[_l_coin_ids].rolling(period).std()
+            if not (data_df.shape[0] > 0):
+                raise ValueError("Invalid dataframe no records found!")
+
+            _l_coin_ids = data_df.ID.unique()
+            for c_id in _l_coin_ids:
+                coin_df = pd.DataFrame(data_df[data_df['ID']==c_id],columns = data_df.columns)
+                coin_df['rolling mean'] = coin_df[value_col_name].rolling(period).std()
+                _rolling_stdv = pd.concat([_rolling_stdv,coin_df])
             _rolling_stdv['Date'] = _rolling_stdv['Date'].astype('datetime64[ns]')
+#            _l_coin_ids = [col for col in data_df if col !='Date']
+#            _rolling_stdv = data_df.copy()
+#            _rolling_stdv[_l_coin_ids] = _rolling_stdv[_l_coin_ids].rolling(period).std()
+#            _rolling_stdv['Date'] = _rolling_stdv['Date'].astype('datetime64[ns]')
 
         except Exception as err:
             _s_fn_id = "Class <ExchangeTradeProtocol> Function <rolling_stdv>"
@@ -256,6 +276,33 @@ class ExtractLoadTransform():
 
         return transp_df
 
+    ''' Function
+            name: match_dataframes
+            parameters:
+                    @name (str)
+                    @clean (dict)
+            procedure: 
+            return DataFrame
+    '''
+    def match_df(self, source_data_df, to_base_data_df):
+
+        import traceback
+        import pandas as pd
+        import datetime
+
+#        matching_df = pd.DataFrame([],columns=['Date','ID','Value'])
+        matching_df = pd.DataFrame()
+
+        try:
+            pass
+        except Exception as err:
+            _s_fn_id = "Class <ExchangeTradeProtocol> Function <match_df>"
+            print("[Error]"+_s_fn_id, err)
+            print(traceback.format_exc())
+
+        return matching_df
+
+        
     ''' Function
             name: match_dataframes
             parameters:
