@@ -36,8 +36,11 @@ class RateOfReturns():
             procedure: 
             return DataFrame
     '''
-    def sum_weighted_returns(self, data_df : pd.DataFrame,
-                             weights : np.array,
+    @staticmethod
+    def sum_weighted_returns(self, 
+                             data_df : pd.DataFrame,
+#                             weights : np.array,   # DEPRECATED because need to account for topN<N
+                             size = 100,
                              probability = 1.0,
                              value_col_name = "value"):
 
@@ -47,21 +50,71 @@ class RateOfReturns():
 
 #        expected_returns_df = pd.DataFrame()
         _l_exp_ret = []
+        S=100
 
         try:
             if not (data_df.shape[0] > 0):
                 raise ValueError("Invalid dataframe")
-            _l_dates = list(data_df['Date'].unique())
 
+            _l_dates = list(data_df['Date'].unique())
             for date in _l_dates:
+                ''' initialize vars'''
+                sum_weighted_index=np.nan
+                weighted_mc_returns=np.nan
+                _max_weight_row=np.nan
                 _top_assets_byDate_df = data_df.loc[data_df['Date'] == date]
-                _top_asset_arr = np.array(_top_assets_byDate_df[value_col_name])
-                weighted_return_arr = np.multiply(_top_asset_arr,weights)
-                sum_weighted_returns = np.sum(weighted_return_arr, axis=1)
-                _l_exp_ret.append({'Date' : date, 'Expected Return' : sum_weighted_returns})  
+                rand_arr = []
+                ''' get random weights for the number of significant assets '''
+                weights=np.random.dirichlet(np.ones(_top_assets_byDate_df.shape[0]),size=size)
+#                _top_asset_arr = np.array(_top_assets_byDate_df[value_col_name])
+#                weighted_return_arr = np.multiply(_top_asset_arr,weights)
+                weighted_return_arr = np.multiply(np.array(_top_assets_byDate_df[value_col_name]),weights)
+                ''' compute the market cap weighted sum '''
+                if 'market_cap' in _top_assets_byDate_df.columns:
+                    weighted_mc_returns = np.sum(np.multiply(np.array(_top_assets_byDate_df['market_cap']),weights))
+                sum_weighted_index = np.sum(weighted_return_arr, axis=1)
+                _max_weight_row = np.argmax(np.array(sum_weighted_index), axis=0)
+                _l_exp_ret.append({'date' : str(date.astype('datetime64[D]')),
+                                   'coins' : list(_top_assets_byDate_df['ID']),
+                                   'max_sum_row' : _max_weight_row,
+                                   value_col_name: list(_top_assets_byDate_df[value_col_name]),
+                                   #'weighted_sum' : sum_weighted_index,
+                                   'best_weights': list(weights[_max_weight_row]),
+                                   'weighted_'+value_col_name+'_sum' : sum_weighted_index[_max_weight_row],
+                                   'weighted_market_cap_returns': weighted_mc_returns,
+                                  })
 
         except Exception as err:
-            _s_fn_id = "Class <RateOfReturns> Function <get_expected_returns>"
+            _s_fn_id = "Class <RateOfReturns> Function <sum_weighted_returns>"
+            print("[Error]"+_s_fn_id, err)
+            print(traceback.format_exc())
+
+        return _l_exp_ret
+
+    ''' Function
+            name: maximize_weights
+            parameters:
+                    @name (str)
+                    @clean (dict)
+            procedure: 
+            return DataFrame
+    '''
+    @staticmethod
+    def maximize_weights(self, sum_weighted_returns:list, value_col_name = "Value"):
+
+        ''' initialize return list '''
+        _l_exp_ret = []
+
+        try:
+            ''' validate list '''
+            if not (len(sum_weighted_returns) > 0):
+                raise ValueError('Invalid list weighted sum returns has %d values' %(len(sum_weighted_returns)))
+
+            for row in sum_weighted_returns:
+                print(row['max_sum_weights'], row[value_col_name])
+
+        except Exception as err:
+            _s_fn_id = "Class <RateOfReturns> Function <maximize_weights>"
             print("[Error]"+_s_fn_id, err)
             print(traceback.format_exc())
 
@@ -75,6 +128,7 @@ class RateOfReturns():
             procedure: 
             return DataFrame
     '''
+    @staticmethod
     def get_simple_returns(self, data_df, value_col_name = "Value"):
 
         _l_coin_ids = [col for col in data_df.columns if col != 'Date']
@@ -91,6 +145,7 @@ class RateOfReturns():
             procedure: 
             return DataFrame
     '''
+    @staticmethod
     def get_holding_period_returns(self, data_df, value_col_name = "Value"):
 
         _l_coin_ids = [col for col in data_df.columns if col != 'Date']
@@ -110,6 +165,7 @@ class RateOfReturns():
             procedure: 
             return DataFrame
     '''
+    @staticmethod
     def get_logarithmic_returns(self, data_df : pd.DataFrame, value_col_name = "Value"):
         
         import traceback
@@ -125,7 +181,7 @@ class RateOfReturns():
             _l_coin_ids = data_df.ID.unique()
             for c_id in _l_coin_ids:
                 coin_df = pd.DataFrame(data_df[data_df['ID']==c_id],columns = data_df.columns)
-                coin_df['log'] = np.log(coin_df[value_col_name].pct_change(periods=1)+1)
+                coin_df['ror'] = np.log(coin_df[value_col_name].pct_change(periods=1)+1)
                 _log_return_df = pd.concat([_log_return_df,coin_df])
 
         except Exception as err:
@@ -136,7 +192,6 @@ class RateOfReturns():
         return _log_return_df
 
 
-#    @staticmethod
     ''' name: get_coin_cov_metric
         description: applied only when the investments are layed over fixed period intervals.
         parameters:
@@ -145,7 +200,8 @@ class RateOfReturns():
         procedure: 
         return list
     '''
-    def get_coin_cov_metric(self,
+    @staticmethod
+    def get_coin_cov_cor_coef_matrix(self,
                             a_data_df: pd.DataFrame,     # first  dataframe, typically with the actual market cap values
                             b_data_df: pd.DataFrame,     # second dataframe, typically with the market cap moving average
                             suffix = ('_mean','_actual')     # suffix values for renaming the columns in the merge
@@ -199,6 +255,7 @@ class RateOfReturns():
             procedure: 
             return DataFrame
     '''
+    @staticmethod
     def get_geometric_return(self, data_df : pd.DataFrame, value_col_name = "Value"):
         
         import traceback

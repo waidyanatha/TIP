@@ -110,4 +110,34 @@ class PortfolioPerformance():
         index_df['Date'] = data_df['Date'].astype('datetime64[ns]')
 
         return index_df
+    @staticmethod
+    def rebalance_etp(self, data_df: pd.DataFrame()):
 
+        import pandas as pd
+        import datetime as dt
+
+        ''' initialize return variable '''
+        new_etp = pd.DataFrame()
+
+        try:
+            if not (data_df.shape[0] > 0):
+                raise ValueError("Invalid dataframe with %d rows" % data_df.shape[0])
+
+            ''' initialize vars '''
+            _rolling_period = 7
+            _win_end_dt = dt.datetime.today()
+            _win_start_dt = dt.datetime.today() - dt.timedelta(_rolling_period)
+
+            rec_sma_marketcap_df = clsETL.rolling_mean(data_df,
+                                                        period=7,
+                                                        value_col_name='market_cap',
+                                                        window_start_date=_win_start_dt,
+                                                        window_end_date=_win_end_dt)
+            rec_smd_marketcap_df = clsETL.rolling_stdv(data_df, period=7, value_col_name='market_cap')
+
+        except Exception as err:
+            _s_fn_id = "Class <PortfolioPerformance> Function <sortino_ratio>"
+            print("[Error]"+_s_fn_id, err)
+            print(traceback.format_exc())
+
+        return new_etp
