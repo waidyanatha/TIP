@@ -1,6 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
+try:
+    # from distutils import filelist
+    # from tkinter import NS
+    # from turtle import pd
+
+    import numpy as np
+    from datetime import datetime, timedelta, date
+    import pandas as pd
+    import traceback
+
+    print("All packages loaded successfully!")
+
+except Exception as e:
+    print("Some packages didn't load\n{}".format(e))
+
 '''
     CLASS that calculates the ortfolio performance and returns the indicators:
         1) 
@@ -33,12 +48,12 @@ class PortfolioPerformance():
     '''
     def sharp_ratio(self, data_df, investment = 100, risk_free_rate=0.02, **params):
 
-        import traceback
-        import pandas as pd
+        # import traceback
+        # import pandas as pd
 
-        avg_simple_returns = pd.Series()
-        std_simple_returns = pd.Series()
-        sharp_ratio = pd.Series()
+        avg_simple_returns = pd.Series(dtype='float64')
+        std_simple_returns = pd.Series(dtype='float64')
+        sharp_ratio = pd.Series(dtype='float64')
 
         try:
             _l_coin_ids = [col for col in data_df.columns if col != 'Date']
@@ -71,9 +86,9 @@ class PortfolioPerformance():
         import traceback
         import pandas as pd
 
-        avg_simple_returns = pd.Series()
-        std_simple_returns = pd.Series()
-        sortino_ratio = pd.Series()
+        avg_simple_returns = pd.Series(dtype='float64')
+        std_simple_returns = pd.Series(dtype='float64')
+        sortino_ratio = pd.Series(dtype='float64')
 
         try:
             _l_coin_ids = [col for col in data_df.columns if col != 'Date']
@@ -94,6 +109,22 @@ class PortfolioPerformance():
             print(traceback.format_exc())
 
         return sortino_ratio
+
+    ''' Function
+            name: value_index
+            parameters:
+                    @name (str)
+                    @clean (dict)
+            procedure: 
+            return DataFrame
+    '''
+    def get_adx(self, data_df):
+
+        _l_coin_ids = [col for col in data_df.columns if col != 'Date']
+        index_df = data_df[_l_coin_ids].div(data_df[_l_coin_ids].sum(axis=1),axis=0)
+        index_df['Date'] = data_df['Date'].astype('datetime64[ns]')
+
+        return index_df
 
     ''' Function
             name: value_index
@@ -141,3 +172,4 @@ class PortfolioPerformance():
             print(traceback.format_exc())
 
         return new_etp
+

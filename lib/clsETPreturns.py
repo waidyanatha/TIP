@@ -1,14 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
+try:
+    # from distutils import filelist
+    # from tkinter import NS
+    # from turtle import pd
+
+    import numpy as np
+    from datetime import datetime, timedelta, date
+    import pandas as pd
+    import traceback
+
+    print("All packages loaded successfully!")
+
+except Exception as e:
+    print("Some packages didn't load\n{}".format(e))
+
 '''
     CLASS with essential timeseries evaluation properties and methods:
         1) 
 '''
 class RateOfReturns():
 
-    import pandas as pd
-    import numpy as np
+    # import pandas as pd
+    # import numpy as np
 
     ''' Function
             name: __init__
@@ -36,7 +51,7 @@ class RateOfReturns():
             procedure: 
             return DataFrame
     '''
-    @staticmethod
+    # @staticmethod
     def sum_weighted_returns(self, 
                              data_df : pd.DataFrame,
 #                             weights : np.array,   # DEPRECATED because need to account for topN<N
@@ -44,9 +59,9 @@ class RateOfReturns():
                              probability = 1.0,
                              value_col_name = "value"):
 
-        import traceback
-        import pandas as pd
-        import numpy as np
+        # import traceback
+        # import pandas as pd
+        # import numpy as np
 
 #        expected_returns_df = pd.DataFrame()
         _l_exp_ret = []
@@ -74,15 +89,17 @@ class RateOfReturns():
                     weighted_mc_returns = np.sum(np.multiply(np.array(_top_assets_byDate_df['market_cap']),weights))
                 sum_weighted_index = np.sum(weighted_return_arr, axis=1)
                 _max_weight_row = np.argmax(np.array(sum_weighted_index), axis=0)
-                _l_exp_ret.append({'date' : str(date.astype('datetime64[D]')),
-                                   'coins' : list(_top_assets_byDate_df['ID']),
-                                   'max_sum_row' : _max_weight_row,
-                                   value_col_name: list(_top_assets_byDate_df[value_col_name]),
-                                   #'weighted_sum' : sum_weighted_index,
-                                   'best_weights': list(weights[_max_weight_row]),
-                                   'weighted_'+value_col_name+'_sum' : sum_weighted_index[_max_weight_row],
-                                   'weighted_market_cap_returns': weighted_mc_returns,
-                                  })
+                _l_exp_ret.append({
+                                'date' : _top_assets_byDate_df['Date'].max(),
+                                # 'date' : str(date.astype('datetime64[D]')),
+                                'coins' : list(_top_assets_byDate_df['ID']),
+                                'max_sum_row' : _max_weight_row,
+                                value_col_name: list(_top_assets_byDate_df[value_col_name]),
+                                #'weighted_sum' : sum_weighted_index,
+                                'best_weights': list(weights[_max_weight_row]),
+                                'weighted_'+value_col_name+'_sum' : sum_weighted_index[_max_weight_row],
+                                'weighted_market_cap_returns': weighted_mc_returns,
+                                })
 
         except Exception as err:
             _s_fn_id = "Class <RateOfReturns> Function <sum_weighted_returns>"
@@ -99,7 +116,7 @@ class RateOfReturns():
             procedure: 
             return DataFrame
     '''
-    @staticmethod
+    # @staticmethod
     def maximize_weights(self, sum_weighted_returns:list, value_col_name = "Value"):
 
         ''' initialize return list '''
@@ -128,7 +145,7 @@ class RateOfReturns():
             procedure: 
             return DataFrame
     '''
-    @staticmethod
+    # @staticmethod
     def get_simple_returns(self, data_df, value_col_name = "Value"):
 
         _l_coin_ids = [col for col in data_df.columns if col != 'Date']
@@ -145,7 +162,7 @@ class RateOfReturns():
             procedure: 
             return DataFrame
     '''
-    @staticmethod
+    # @staticmethod
     def get_holding_period_returns(self, data_df, value_col_name = "Value"):
 
         _l_coin_ids = [col for col in data_df.columns if col != 'Date']
@@ -165,12 +182,12 @@ class RateOfReturns():
             procedure: 
             return DataFrame
     '''
-    @staticmethod
+    # @staticmethod
     def get_logarithmic_returns(self, data_df : pd.DataFrame, value_col_name = "Value"):
         
-        import traceback
-        import pandas as pd
-        import numpy as np
+        # import traceback
+        # import pandas as pd
+        # import numpy as np
 
         _log_return_df = pd.DataFrame()
 
@@ -200,16 +217,16 @@ class RateOfReturns():
         procedure: 
         return list
     '''
-    @staticmethod
+    # @staticmethod
     def get_coin_cov_cor_coef_matrix(self,
                             a_data_df: pd.DataFrame,     # first  dataframe, typically with the actual market cap values
                             b_data_df: pd.DataFrame,     # second dataframe, typically with the market cap moving average
                             suffix = ('_mean','_actual')     # suffix values for renaming the columns in the merge
                            ):
 
-        import traceback
-        import pandas as pd
-        import numpy as np
+        # import traceback
+        # import pandas as pd
+        # import numpy as np
 
         _l_cov_dict = []    # return the dictionary of covariance
 
@@ -255,12 +272,12 @@ class RateOfReturns():
             procedure: 
             return DataFrame
     '''
-    @staticmethod
+    # @staticmethod
     def get_geometric_return(self, data_df : pd.DataFrame, value_col_name = "Value"):
         
-        import traceback
-        import pandas as pd
-        import numpy as np
+        # import traceback
+        # import pandas as pd
+        # import numpy as np
 
         try:
             pass
