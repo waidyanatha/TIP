@@ -111,20 +111,83 @@ class PortfolioPerformance():
         return sortino_ratio
 
     ''' Function
-            name: value_index
+            name: get_adx
             parameters:
                     @name (str)
                     @clean (dict)
             procedure: 
             return DataFrame
     '''
-    def get_adx(self, data_df):
+    def get_adx(self,
+                ticker_data : pd.DataFrame,
+                window_start_date : date,
+                window_end_date : date,
+                rolling_window_length=7,
+                value_col_name='market_cap',
+                ):
 
-        _l_coin_ids = [col for col in data_df.columns if col != 'Date']
-        index_df = data_df[_l_coin_ids].div(data_df[_l_coin_ids].sum(axis=1),axis=0)
-        index_df['Date'] = data_df['Date'].astype('datetime64[ns]')
+        adx_df = pd.DataFrame()
 
-        return index_df
+        try:
+            if not (ticker_data.shape[0] > 0):
+                raise ValueError("Invalid dataframe with %d rows" % (ticker_data.shape[0]))
+            adx_df = ticker_data.copy()
+            print(adx_df.columns)
+            ''' Calculate the True range which is the log_ROR available in the input dataframe '''
+            if not 'ror' in adx_df.columns:
+                ''' Initialize class to calculate ror '''
+                import sys
+                # sys.path.insert(1, '../lib')
+                import clsETPreturns as returns
+                clsROR = returns.RateOfReturns(name="adxData")
+                adx_df = clsROR.get_logarithmic_returns(adx_df, value_col_name=value_col_name)
+                adx_df.dropna(axis=0, how='any', inplace=True)
+            ''' Positive Directional Movement --> log_ROR <= 1; else set to 0 '''
+            adx_df['+DM']=adx_df['ror']
+            adx_df['+DM']=np.where(adx_df['+DM'] <= 0, adx_df['+DM'].abs(), 0)
+            ''' Negative Directional Movement --> log_ROR > 1; else set to 0 '''
+            adx_df['-DM']=adx_df['ror']
+            adx_df['-DM']=np.where(adx_df['-DM'] > 0, adx_df['-DM'].abs(), 0)
+            ''' Smoothed values '''
+            import sys
+            sys.path.insert(1, '../lib')
+            import clsDataETL as etl
+            # ''' TODO fix the path dependency in ETL '''
+            # _path = "../data/market_cap_2021-01-01_2022-06-01/"
+            ''' REMOVE after debuggin complete '''
+            import importlib
+            etl = importlib.reload(etl)
+            clsETL = etl.ExtractLoadTransform()
+            _cal_ops_dict = {
+                "simp_move_avg" : "+DM",
+                "simp_move_std" : "+DM",
+                "simp_move_sum" : "+DM",
+                "momentum" : "+DM",
+                }
+
+            adx_df = clsETL.get_rolling_measures(ticker_data=adx_df,
+                                                rolling_window_length=7,
+                                                window_start_date = window_start_date,
+                                                window_end_date = window_end_date,
+                                                rolling_measure_dict = _cal_ops_dict,)
+            # adx_df = clsETL.get_rolling_mean(ticker_data=adx_df,
+            #                                     rolling_window_length=7,
+            #                                     value_col_name='-DM',
+            #                                     window_start_date = window_start_date,
+            #                                     window_end_date = window_end_date)
+
+            ''' The Positive Index Indicator and Negative Index Indicator '''
+            
+            ''' ADX Indicator: Final Calculations '''
+
+            _l_coin_ids = [col for col in adx_df.columns if col != 'Date']
+
+        except Exception as err:
+            _s_fn_id = "Class <PortfolioPerformance> Function <get_adx>"
+            print("[Error]"+_s_fn_id, err)
+            print(traceback.format_exc())
+
+        return adx_df
 
     ''' Function
             name: value_index
