@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-from numpy import isin
-
-
 try:
     # from distutils import filelist
     # from tkinter import NS
     # from turtle import pd
 
+    from numpy import isin
     import numpy as np
     from datetime import datetime, timedelta, date
     import pandas as pd
     import traceback
 
-    print("All packages loaded successfully!")
+    print("All packages in ExtractLoadTransform loaded successfully!")
 
 except Exception as e:
     print("Some packages didn't load\n{}".format(e))
@@ -441,29 +439,44 @@ class ExtractLoadTransform():
 #    @staticmethod
     def transfrom_data(self,data_df, value_col_name = "Value"):
 
+        try:
+            if data_df.shape[0] <= 0:
+                raise ValueError("Invalid dataframe with %d rows" %(data_df.shape[0]))
+            ''' Initialize variables '''
+            _l_coin_ids = sorted(data_df['ID'].unique())
+            if len(_l_coin_ids) <= 0:
+                raise ValueError("No tickers found")
+            _l_dates = sorted(data_df['Date'].unique())
+            if len(_l_dates) <= 0:
+                raise ValueError("No dates found")
+            _l_columns = list(sorted(data_df['ID'].unique()))
+            if len(_l_columns) <= 0:
+                raise ValueError("No columns found")
+            _l_columns.insert(0,"Date")
 
-        ''' Initialize variables '''
-        _l_coin_ids = sorted(data_df['ID'].unique())
-        _l_dates = sorted(data_df['Date'].unique())
-        _l_columns = list(sorted(data_df['ID'].unique()))
-        _l_columns.insert(0,"Date")
+            market_df = pd.DataFrame([], columns=_l_columns)
+            market_df["Date"] = _l_dates
 
-        market_df = pd.DataFrame([], columns=_l_columns)
-        market_df["Date"] = _l_dates
+            for _s_coin_id in _l_coin_ids:
+                tmp_df = pd.DataFrame([])
+                tmp_df = data_df.loc[data_df["ID"] == _s_coin_id]
+                tmp_df = tmp_df.sort_values(by=['Date'])
+                tmp_df = tmp_df.dropna(inplace=False)
 
-        for _s_coin_id in _l_coin_ids:
-            tmp_df = pd.DataFrame([])
-            tmp_df = data_df.loc[data_df["ID"] == _s_coin_id]
-            tmp_df = tmp_df.sort_values(by=['Date'])
-            tmp_df = tmp_df.dropna(inplace=False)
+                for _date in tmp_df["Date"]:
+                    print(_date)
+                    _value = tmp_df.loc[tmp_df['Date'] == _date, value_col_name].item()
+                    market_df.loc[market_df['Date']==_date, _s_coin_id] = _value
 
-            for _date in tmp_df["Date"]:
-                _value = tmp_df.loc[tmp_df['Date'] == _date, value_col_name].item()
-                market_df.loc[market_df['Date']==_date, _s_coin_id] = _value
+            ''' Set the dtypes '''
+            market_df['Date'] = market_df['Date'].astype('datetime64[ns]')
+            market_df.loc[:,market_df.columns !='Date'] = market_df.loc[:,market_df.columns !='Date'].astype('float64')
+            # print(market_df)
 
-        ''' Set the dtypes '''
-        market_df['Date'] = market_df['Date'].astype('datetime64[ns]')
-        market_df.loc[:,market_df.columns !='Date'] = market_df.loc[:,market_df.columns !='Date'].astype('float64')
+        except Exception as err:
+            _s_fn_id = "Class <ExtractLoadTransform> Function <transfrom_data>"
+            print("[Error]"+_s_fn_id, err)
+            print(traceback.format_exc())
 
         return market_df
 

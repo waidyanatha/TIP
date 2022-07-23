@@ -198,7 +198,7 @@ class RateOfReturns():
             _l_coin_ids = data_df.ID.unique()
             for c_id in _l_coin_ids:
                 coin_df = pd.DataFrame(data_df[data_df['ID']==c_id],columns = data_df.columns)
-                coin_df['ror'] = np.log(coin_df[value_col_name].pct_change(periods=1)+1)
+                coin_df[value_col_name+'_ror'] = np.log(coin_df[value_col_name].pct_change(periods=1)+1)
                 _log_return_df = pd.concat([_log_return_df,coin_df])
 
         except Exception as err:
