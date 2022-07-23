@@ -48,9 +48,6 @@ class PortfolioPerformance():
     '''
     def sharp_ratio(self, data_df, investment = 100, risk_free_rate=0.02, **params):
 
-        # import traceback
-        # import pandas as pd
-
         avg_simple_returns = pd.Series(dtype='float64')
         std_simple_returns = pd.Series(dtype='float64')
         sharp_ratio = pd.Series(dtype='float64')
@@ -59,7 +56,6 @@ class PortfolioPerformance():
             _l_coin_ids = [col for col in data_df.columns if col != 'Date']
             simple_returns = data_df[_l_coin_ids].pct_change(periods=1)
             simple_returns["Date"] = data_df["Date"].astype('datetime64[ns]')
-#            _l_coin_ids = [col for col in simple_returns if col != 'Date']
             avg_simple_returns = simple_returns[_l_coin_ids].mean()
             std_simple_returns = simple_returns[_l_coin_ids].std()
             risk_free_rate = avg_simple_returns['bitcoin']
@@ -153,34 +149,39 @@ class PortfolioPerformance():
             sys.path.insert(1, '../lib')
             import clsDataETL as etl
             # ''' TODO fix the path dependency in ETL '''
-            # _path = "../data/market_cap_2021-01-01_2022-06-01/"
             ''' REMOVE after debuggin complete '''
             import importlib
             etl = importlib.reload(etl)
             clsETL = etl.ExtractLoadTransform()
             _cal_ops_dict = {
-                "simp_move_avg" : "+DM",
-                "simp_move_std" : "+DM",
                 "simp_move_sum" : "+DM",
-                "momentum" : "+DM",
+                "simp_move_avg" : "+DM",
                 }
-
             adx_df = clsETL.get_rolling_measures(ticker_data=adx_df,
                                                 rolling_window_length=7,
                                                 window_start_date = window_start_date,
                                                 window_end_date = window_end_date,
                                                 rolling_measure_dict = _cal_ops_dict,)
-            # adx_df = clsETL.get_rolling_mean(ticker_data=adx_df,
-            #                                     rolling_window_length=7,
-            #                                     value_col_name='-DM',
-            #                                     window_start_date = window_start_date,
-            #                                     window_end_date = window_end_date)
-
+            _cal_ops_dict = {
+                "simp_move_sum" : "-DM",
+                "simp_move_avg" : "-DM",
+                }
+            adx_df = clsETL.get_rolling_measures(ticker_data=adx_df,
+                                                rolling_window_length=7,
+                                                window_start_date = window_start_date,
+                                                window_end_date = window_end_date,
+                                                rolling_measure_dict = _cal_ops_dict,)
             ''' The Positive Index Indicator and Negative Index Indicator '''
-            
+            for col in adx_df.filter(items=['+DM','-DM']).columns:
+                adx_df['shift_'+col]=adx_df[col].shift(1, axis = 0)
+            adx_df[adx_df.filter(like='DM').columns]=adx_df[adx_df.filter(like='DM').columns].fillna(value=0)
+            adx_df['smooth+DM']=(adx_df['simp_move_sum_+DM'].subtract(adx_df['simp_move_avg_+DM'])).add(adx_df['shift_+DM'])
+            adx_df['smooth-DM']=(adx_df['simp_move_sum_-DM'].subtract(adx_df['simp_move_avg_-DM'])).add(adx_df['shift_-DM'])
             ''' ADX Indicator: Final Calculations '''
+            adx_df['+DI']=adx_df['simp_move_avg_+DM'].div(adx_df['smooth+DM'])
+            adx_df['-DI']=adx_df['simp_move_avg_-DM'].div(adx_df['smooth-DM'])
 
-            _l_coin_ids = [col for col in adx_df.columns if col != 'Date']
+            # _l_coin_ids = [col for col in adx_df.columns if col != 'Date']
 
         except Exception as err:
             _s_fn_id = "Class <PortfolioPerformance> Function <get_adx>"

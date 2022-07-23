@@ -28,8 +28,6 @@ except Exception as e:
 
 class ExtractLoadTransform():
 
-    # import datetime as dt
-
     ''' Function
             name: __init__
             parameters:
@@ -44,31 +42,12 @@ class ExtractLoadTransform():
                 # end_date,   # : date = np.nan,
                 ):
         
-        # import datetime
-        # import pandas as pd
-
         self.data = pd.DataFrame()
-        # self.start_date = start_date.date()
-        # self.end_date = end_date.date()
         self.start_date = np.nan
         self.end_date = np.nan
         self.path = np.nan
         self.filelist = np.nan
 
-        # if dataPath:
-        #     self.path = dataPath     # path = "../data/market_cap_2021-01-01_2022-06-01/"
-        #     self.filelist = self.get_file_list(self.path)
-        #     self.data = self.load_data()
-        #     self.data['Date'] = pd.to_datetime(self.data['Date']).dt.date
-        # else:
-        #     self.path = np.nan
-        #     self.filelist = np.nan
-
-        # if self.data.shape[0] > 0:
-        #     if isinstance(start_date,date) and isinstance(end_date,date):
-        #         self.start_date = start_date
-        #         self.end_date = end_date
-        #         self.data = self.fillter_by_date(self.data,self.start_date,self.end_date)
         self.win_start_dt = ''
         self.win_end_dt = ''
         self.roll_win_len = 7   # rolling window length; e.g., for calculating simple moving average
@@ -81,8 +60,6 @@ class ExtractLoadTransform():
                                 ]
 
         if self.data.shape[0] > 0:
-            # self.win_start_dt = (self.data.Date.min()).date()
-            # self.win_end_dt = (self.data.Date.max()).date()
             self.win_start_dt = self.data.Date.min()
             self.win_end_dt = self.data.Date.max()
  
@@ -99,13 +76,11 @@ class ExtractLoadTransform():
 #    @classmethod
     def get_file_list(self, path):
 
-        # import OS module
         import os
 
-        # Get the list of all files and directories        
+        ''' Get the list of all files and directories '''        
         if path:
             self.path = path
-#        dir_list = os.listdir(self.path)
         return os.listdir(self.path)
 
     ''' Function
@@ -122,9 +97,6 @@ class ExtractLoadTransform():
                         start_dt,  # fliter start date
                         end_dt,    # filter end date
                        ):
-
-        # import pandas as pd
-        # import datetime
 
         ''' intiatlize returning dataframes '''
         return_df = pd.DataFrame()
@@ -168,26 +140,13 @@ class ExtractLoadTransform():
                 end_date,   # : date = np.nan,
                 ):
 
-        # import traceback
-        # import pandas as pd
-
         try:
-#d            dir_list = self.get_file_list(path)
-
-            # if len(list(filelist)) > 0:
-            #     self.filelist = filelist
-            # else:
-            #     ''' get file list from dir path '''
-            #     self.filelist = self.get_file_list(self.path)
-
             if dataPath:
                 self.path = dataPath     # path = "../data/market_cap_2021-01-01_2022-06-01/"
                 self.filelist = self.get_file_list(self.path)
                 ''' confirm data files exist'''
                 if not (len(self.filelist) > 0):
                     raise ValueError("No data files found in dir: %s" % (self.path))
-                # self.data = self.load_data()
-                # self.data['Date'] = pd.to_datetime(self.data['Date']).dt.date
             else:
                 raise ValueError("Invalid path %s given for retrieving data" % (dataPath))
 
@@ -211,25 +170,6 @@ class ExtractLoadTransform():
                     self.end_date = end_date
                     self.data = self.fillter_by_date(self.data,self.start_date,self.end_date)
 
-            # ''' confirm data files exist'''
-            # if not (len(self.filelist) > 0):
-            #     raise ValueError("No data files found in dir: %s" % (self.path))
-
-            # columns = ["Date","ID","Symbol","market_cap"]
-            # data_df = pd.DataFrame([],columns=columns)
-            # for _s_file in self.filelist:
-            #     if _s_file.endswith(".csv"):
-            #         _s_rel_path = self.path+_s_file
-            #         _tmp_df = pd.read_csv(_s_rel_path, index_col=False)
-            #         data_df = pd.concat([data_df,_tmp_df[columns]])
-            # data_df.reset_index(drop=True)
-            # data_df = data_df[data_df['market_cap'].notna()]
-            # # data_df['Date'] = data_df['Date'].astype('datetime64[ns]')
-            # data_df['Date'] = data_df['Date'].astype('datetime64[D]')
-            # data_df['market_cap'] = data_df['market_cap'].astype('float64')
-
-#            data_df = self.fillter_by_date(data_df,self.start_date,self.end_date)
-
         except Exception as err:
             _s_fn_id = "Class <ExtractLoadTransform> Function <load_data>"
             print("[Error]"+_s_fn_id, err)
@@ -250,9 +190,6 @@ class ExtractLoadTransform():
                                     data_df:pd.DataFrame,
                                     val_col_name='Value',
                                     **kwargs):
-
-        # import traceback
-        # import pandas as pd
 
         try:
             if not data_df.shape[0] > 0:
@@ -277,7 +214,6 @@ class ExtractLoadTransform():
                 for idx, row in assets.iterrows():
                     asset_dict = {'Date' : row['Date'], 'ID' : row['ID'], val_col_name : row[val_col_name]}
                     topNAssets = pd.concat([topNAssets,pd.DataFrame([asset_dict])])
-            # topNAssets['Date'] = topNAssets['Date'].astype('datetime64[ns]')
             topNAssets['Date'] = pd.to_datetime(topNAssets['Date']).dt.date
 
         except Exception as err:
@@ -298,9 +234,6 @@ class ExtractLoadTransform():
 #    @staticmethod
     def get_fixed_topN_assets(self,data_df, N = 3, val_col_name='Value'):
 
-        # import traceback
-        # import pandas as pd
-
         try:
             _l_dates = data_df['Date'].unique()
             _l_topNassets = []
@@ -308,7 +241,6 @@ class ExtractLoadTransform():
             for date in _l_dates:
                 ''' get assets and sort by value column '''
                 assets = data_df.loc[data_df['Date'] == date]
-#                assets.dropna(axis=0, how='any', inplace=True)
                 assets = assets.sort_values(by=val_col_name,axis=0, ascending=False)
                 _l_assetsID = []
                 _l_marketCap = []
@@ -334,9 +266,6 @@ class ExtractLoadTransform():
     '''
 #    @staticmethod
     def weights_matrix(self, N=3,S=10):
-
-        # import numpy as np   #numpy.random
-        # import traceback
 
         try:
             rand_arr = []
@@ -364,7 +293,6 @@ class ExtractLoadTransform():
                        window_start_date,       # rolling windonw start date
                        window_end_date,         # rolling window end date
                        roll_calc_ops_dict,        # dict of rolling operations: mean, std, sum, adx 
-                    #    value_col_name='Value',  # column name contaning the values
                         ):
         try:
             if not (isinstance(ticker_data,pd.DataFrame) and ticker_data.shape[0] > 0):
@@ -379,33 +307,26 @@ class ExtractLoadTransform():
             if isinstance(window_end_date, date):
                 if window_end_date in ticker_data.Date.unique():
                     self.win_end_dt = window_end_date
-                    # print("setting rolling windown end date",self.win_end_dt)
                 else:
                     self.win_end_dt = ticker_data.Date.max()
-                    # print("setting rolling windown end date to maximum date in dataframe",self.win_end_dt)
             else:
                 raise ValueError("Invalid datetime.date type window end date %s" % (type(window_end_date)))
             
             if isinstance(window_start_date, date):
                 if ((self.win_end_dt - window_start_date).days > 2*self.roll_win_len):   # start date must be twice window length
-                    # print("Rolling windown start date: %s > %d days from the end date: %s"
-                        # %(str(window_start_date),2*self.roll_win_len, str(self.end_date)))
                     if (window_start_date - timedelta(days=rolling_window_length)) in ticker_data['Date'].unique():
                         self.win_start_dt = window_start_date
                     elif (self.win_end_dt - timedelta(days=(2*self.roll_win_len))) in ticker_data['Date'].unique():
-                        # print("In valid rolling windown start date %s. Must be at least twice the window length %d from end date %d"
-                                # % (str(window_start_date),self.roll_win_len,str(window_end_date)))
                         self.win_start_dt = self.win_end_dt - timedelta(days=(2*rolling_window_length))
-                        # print("Start date set to %s" % (self.win_start_dt))
                 else:
                     raise ValueError("Invalid start date: %s. It must be %d days less than end date: %s"
                                         % (str(window_start_date),2*self.roll_win_len,str(self.win_end_dt)))
             else:
                 raise ValueError("Invalid datetime.date type window start date %s" % (type(window_start_date)))
             _keys = list(set(roll_calc_ops_dict.keys()).intersection(set(self.roll_calc_op_types)))
-            # if roll_calc_ops_dict.keys() in self.roll_calc_op_types:
             if len(_keys) > 0:
                 self.roll_calc_ops_dict = roll_calc_ops_dict
+                print(roll_calc_ops_dict)
             else:
                 raise ValueError("No valid rolling calculations defined to continue", roll_calc_ops_dict)
 
@@ -458,13 +379,7 @@ class ExtractLoadTransform():
             window_start_date,      # rolling windonw start date
             window_end_date,        # rolling window end date
             rolling_measure_dict,   # dictionary of rolling calculations  ; e.g. sum, mean, adx
-            # value_col_name='Value',  # column name contaning the values
         ):
-
-        # import traceback
-        # import pandas as pd
-        # from datetime import datetime, timedelta, date
-#        import numpy as np
 
         _rolling_df = pd.DataFrame()
 
@@ -507,8 +422,6 @@ class ExtractLoadTransform():
                     else:
                         pass
                     _rolling_df = pd.concat([_rolling_df,coin_df])
-                # break
-            # _rolling_mean['Date'] = _rolling_mean['Date'].astype('datetime64[ns]')
 
         except Exception as err:
             _s_fn_id = "Class <ExtractLoadTransform> Function <get_rolling_measures>"
@@ -516,158 +429,6 @@ class ExtractLoadTransform():
             print(traceback.format_exc())
 
         return _rolling_df
-
-#     ''' Function
-#             name: rolling_mean
-#             parameters:
-#                     @name (str)
-#                     @clean (dict)
-#             procedure: 
-#             return DataFrame
-#     '''
-# #    @staticmethod
-#     def get_rolling_mean(self,
-#                        ticker_data,     # data frame with date, ticker id and value
-#                        rolling_window_length,   # retrospective start date of moving average
-#                        window_start_date,       # rolling windonw start date
-#                        window_end_date,         # rolling window end date
-#                        value_col_name='Value',  # column name contaning the values
-#                         ):
-
-#         # import traceback
-#         # import pandas as pd
-#         # from datetime import datetime, timedelta, date
-# #        import numpy as np
-
-#         _rolling_mean = pd.DataFrame()
-
-#         try:
-#             if not self.set_valid_rolling_vars(
-#                             ticker_data,     # data frame with date, ticker id and value
-#                             rolling_window_length,   # retrospective start date of moving average
-#                             window_start_date,       # rolling windonw start date
-#                             window_end_date,         # rolling window end date
-#                             value_col_name='Value',  # column name contaning the values
-#                             ):
-#                 raise ValueError("One or more invalid inputs")
-
-#             mask = (ticker_data.Date <= self.win_end_dt) & (ticker_data.Date >= self.win_start_dt)
-#             ticker_data = ticker_data[mask]
-#             _l_coin_ids = ticker_data.ID.unique()
-#             for c_id in _l_coin_ids:
-#                 coin_df = pd.DataFrame(ticker_data[ticker_data['ID']==c_id],columns = ticker_data.columns)
-#                 ''' compute the simple moving average for the period '''
-#                 coin_df['sma_'+value_col_name] = coin_df[value_col_name].rolling(self.roll_win_len,min_periods=1).mean()
-#                 _rolling_mean = pd.concat([_rolling_mean,coin_df])
-
-#             # _rolling_mean['Date'] = _rolling_mean['Date'].astype('datetime64[ns]')
-
-#         except Exception as err:
-#             _s_fn_id = "Class <ExtractLoadTransform> Function <rolling_mean>"
-#             print("[Error]"+_s_fn_id, err)
-#             print(traceback.format_exc())
-
-#         return _rolling_mean
-
-    # ''' Function
-    #         name: rolling_stdv
-    #         parameters:
-    #                 @name (str)
-    #                 @clean (dict)
-    #         procedure: 
-    #         return DataFrame
-    # '''
-#    @staticmethod
-#    def rolling_stdv(self, data_df, period=7, value_col_name='Value'):
-    # def get_rolling_stdv(self,
-    #                 ticker_data,     # data frame with date, ticker id and value
-    #                 rolling_window_length,   # retrospective start date of moving average
-    #                 window_start_date,       # rolling windonw start date
-    #                 window_end_date,         # rolling window end date
-    #                 value_col_name='Value',  # column name contaning the values
-    #                 ):
-
-    #     # import traceback
-    #     # import pandas as pd
-    #     # from datetime import datetime, timedelta
-
-    #     _rolling_stdv = pd.DataFrame()
-
-    #     try:
-    #         if not self.set_valid_rolling_vars(
-    #                         ticker_data,     # data frame with date, ticker id and value
-    #                         rolling_window_length,   # retrospective start date of moving average
-    #                         window_start_date,       # rolling windonw start date
-    #                         window_end_date,         # rolling window end date
-    #                         value_col_name='Value',  # column name contaning the values
-    #                         ):
-    #             raise ValueError("One or more invalid inputs")
-
-    #         mask = (ticker_data.Date <= self.win_end_dt) & (ticker_data.Date >= self.win_start_dt)
-    #         ticker_data = ticker_data[mask]
-    #         _l_coin_ids = ticker_data.ID.unique()
-    #         for c_id in _l_coin_ids:
-    #             coin_df = pd.DataFrame(ticker_data[ticker_data['ID']==c_id],columns = ticker_data.columns)
-    #             ''' compute the simple moving average for the period '''
-
-    #             coin_df['smd'] = coin_df[value_col_name].rolling(rolling_window_length,min_periods=1).std()
-    #             _rolling_stdv = pd.concat([_rolling_stdv,coin_df])
-    #         # _rolling_stdv['Date'] = _rolling_stdv['Date'].astype('datetime64[ns]')
-
-    #     except Exception as err:
-    #         _s_fn_id = "Class <ExtractLoadTransform> Function <get_rolling_stdv>"
-    #         print("[Error]"+_s_fn_id, err)
-    #         print(traceback.format_exc())
-
-    #     return _rolling_stdv
-
-    # ''' Function
-    #         name: get_momentum
-    #         parameters:
-    #                 @name (str)
-    #                 @clean (dict)
-    #         procedure: 
-    #         return DataFrame
-    # '''
-    # def get_rolling_momentum(self,
-    #                 ticker_data,     # data frame with date, ticker id and value
-    #                 rolling_window_length,   # retrospective start date of moving average
-    #                 window_start_date,       # rolling windonw start date
-    #                 window_end_date,         # rolling window end date
-    #                 value_col_name='Value',  # column name contaning the values
-    #                 ):
-
-    #     _rolling_momentum = pd.DataFrame()
-
-    #     try:
-    #         if not self.set_valid_rolling_vars(
-    #                         ticker_data,     # data frame with date, ticker id and value
-    #                         rolling_window_length,   # retrospective start date of moving average
-    #                         window_start_date,       # rolling windonw start date
-    #                         window_end_date,         # rolling window end date
-    #                         value_col_name='Value',  # column name contaning the values
-    #                         ):
-    #             raise ValueError("One or more invalid inputs")
-
-    #         mask = (ticker_data.Date <= self.win_end_dt) & (ticker_data.Date >= self.win_start_dt)
-    #         ticker_data = ticker_data[mask]
-    #         _l_coin_ids = ticker_data.ID.unique()
-    #         for c_id in _l_coin_ids:
-    #             coin_df = pd.DataFrame(ticker_data[ticker_data['ID']==c_id],columns = ticker_data.columns)
-    #             ''' compute the simple moving average for the period '''
-
-    #             coin_df['momentum'] = coin_df[value_col_name].\
-    #                         rolling(self.roll_win_len,min_periods=1).\
-    #                             apply(self.linreg_momentum,raw=False)
-    #             _rolling_momentum = pd.concat([_rolling_momentum,coin_df])
-    #         # _rolling_momentum['Date'] = _rolling_momentum['Date'].astype('datetime64[ns]')
-
-    #     except Exception as err:
-    #         _s_fn_id = "Class <ExtractLoadTransform> Function <get_rolling_momentum>"
-    #         print("[Error]"+_s_fn_id, err)
-    #         print(traceback.format_exc())
-
-    #     return _rolling_momentum
 
     ''' Function REPLACE with dataframe.melt function
             name: transfrom_data
@@ -680,7 +441,6 @@ class ExtractLoadTransform():
 #    @staticmethod
     def transfrom_data(self,data_df, value_col_name = "Value"):
 
-        # import pandas as pd
 
         ''' Initialize variables '''
         _l_coin_ids = sorted(data_df['ID'].unique())
@@ -701,10 +461,6 @@ class ExtractLoadTransform():
                 _value = tmp_df.loc[tmp_df['Date'] == _date, value_col_name].item()
                 market_df.loc[market_df['Date']==_date, _s_coin_id] = _value
 
-        ''' DEPRECATED Cleanup rows and columns elsewhere '''
-#        market_df=market_df.drop_duplicates()
-#        market_df = market_df.dropna(axis=1)
-
         ''' Set the dtypes '''
         market_df['Date'] = market_df['Date'].astype('datetime64[ns]')
         market_df.loc[:,market_df.columns !='Date'] = market_df.loc[:,market_df.columns !='Date'].astype('float64')
@@ -721,9 +477,6 @@ class ExtractLoadTransform():
     '''
 #    @staticmethod
     def transpose_pivot(self, data_df):
-
-        # import traceback
-        # import pandas as pd
         
         transp_df = pd.DataFrame([], columns=['Date','ID','market_cap'])
         _l_dates = data_df['Date'].unique()
@@ -754,11 +507,6 @@ class ExtractLoadTransform():
     '''
     def match_df(self, source_data_df, to_base_data_df):
 
-        # import traceback
-        # import pandas as pd
-        # import datetime
-
-#        matching_df = pd.DataFrame([],columns=['Date','ID','Value'])
         matching_df = pd.DataFrame()
 
         try:
@@ -780,10 +528,6 @@ class ExtractLoadTransform():
             return DataFrame
     '''
     def match_dataframes(self, source_data_df, to_base_data_df):
-
-        # import traceback
-        # import pandas as pd
-        # import datetime
 
         matching_df = pd.DataFrame([],columns=['Date','ID','Value'])
 

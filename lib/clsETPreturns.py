@@ -11,7 +11,7 @@ try:
     import pandas as pd
     import traceback
 
-    print("All packages loaded successfully!")
+    print("All packages in clsETPReturns loaded successfully!")
 
 except Exception as e:
     print("Some packages didn't load\n{}".format(e))
@@ -263,28 +263,28 @@ class RateOfReturns():
 
         return _l_cov_dict
 
-    ''' Function [TBD] Phase II
-            name: get_geometric_return
-            description: applied only when the investments are layed over fixed period intervals.
-            parameters:
-                    @name (str)
-                    @clean (dict)
-            procedure: 
-            return DataFrame
-    '''
-    # @staticmethod
-    def get_geometric_return(self, data_df : pd.DataFrame, value_col_name = "Value"):
+    # ''' Function [TBD] Phase II
+    #         name: get_geometric_return
+    #         description: applied only when the investments are layed over fixed period intervals.
+    #         parameters:
+    #                 @name (str)
+    #                 @clean (dict)
+    #         procedure: 
+    #         return DataFrame
+    # '''
+    # # @staticmethod
+    # def get_geometric_return(self, data_df : pd.DataFrame, value_col_name = "Value"):
         
-        # import traceback
-        # import pandas as pd
-        # import numpy as np
+    #     # import traceback
+    #     # import pandas as pd
+    #     # import numpy as np
 
-        try:
-            pass
+    #     try:
+    #         pass
 
-        except Exception as err:
-            _s_fn_id = "Class <RateOfReturns> Function <get_geometric_return>"
-            print("[Error]"+_s_fn_id, err)
-            print(traceback.format_exc())
+    #     except Exception as err:
+    #         _s_fn_id = "Class <RateOfReturns> Function <get_geometric_return>"
+    #         print("[Error]"+_s_fn_id, err)
+    #         print(traceback.format_exc())
 
-        return _log_return_df
+    #     return _log_return_df
