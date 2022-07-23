@@ -180,8 +180,8 @@ class AssetMCapStore():
 
         import boto3
 
-        AWS_ACCESS_KEY_ID = 'AKIA2N5RYRM4VSAMCF76'
-        AWS_SECRET_ACCESS_KEY = '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'
+        AWS_ACCESS_KEY_ID = ''
+        AWS_SECRET_ACCESS_KEY = ''
         NEW_BUCKET_NAME = 'waidy-thin-three'
 
         try:
