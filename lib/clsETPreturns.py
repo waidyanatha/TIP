@@ -200,6 +200,7 @@ class RateOfReturns():
                 coin_df = pd.DataFrame(data_df[data_df['ID']==c_id],columns = data_df.columns)
                 coin_df[value_col_name+'_ror'] = np.log(coin_df[value_col_name].pct_change(periods=1)+1)
                 _log_return_df = pd.concat([_log_return_df,coin_df])
+                # print(_log_return_df['Date'].value_counts())
 
         except Exception as err:
             _s_fn_id = "Class <RateOfReturns> Function <get_logarithmic_return>"
