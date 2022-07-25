@@ -52,9 +52,10 @@ class ExtractLoadTransform():
         self.min_roll_win_len = 7
         self.roll_calc_ops_dict = {} # key:val pair of rolling operations: mean, std, sum, adx and column name
         self.roll_calc_op_types=['simp_move_avg',   # simple moving average
-                                'simp_move_std',    # simple moving standard deviation
-                                'simp_move_sum',    # simple moving sum
-                                'simp_cum_prod',    # simple cummalative product
+                                 'simp_move_std',    # simple moving standard deviation
+                                 'simp_move_sum',    # simple moving sum
+                                 'simp_cum_prod',    # simple cummalative product
+                                 'momentum',
                                 ]
 
         if self.data.shape[0] > 0:
@@ -277,7 +278,7 @@ class ExtractLoadTransform():
         return np.around(rand_arr,4)
 
     ''' Function
-            name: get_momentum
+            name: linreg_momentum
             parameters:
                     @name (str)
                     @clean (dict)
@@ -347,8 +348,8 @@ class ExtractLoadTransform():
                     #                     % (str(window_start_date),2*self.roll_win_len,str(self.win_end_dt)))
                 else:
                     raise ValueError("Something went wrong with the window start date %s" % (type(window_start_date)))
-            print("end dt",self.win_end_dt)
-            print("start dt",self.win_start_dt)
+#             print("end dt",self.win_end_dt)
+#             print("start dt",self.win_start_dt)
 
             _keys = list(set(roll_calc_ops_dict.keys()).intersection(set(self.roll_calc_op_types)))
             if len(_keys) > 0:
@@ -360,7 +361,7 @@ class ExtractLoadTransform():
             return True
 
         except Exception as err:
-            _s_fn_id = "Class <ExtractLoadTransform> Function <weights_matrix>"
+            _s_fn_id = "Class <ExtractLoadTransform> Function <set_valid_rolling_vars>"
             print("[Error]"+_s_fn_id, err)
             print(traceback.format_exc())
 
@@ -406,7 +407,7 @@ class ExtractLoadTransform():
 
             mask = (ticker_data.Date <= self.win_end_dt) & (ticker_data.Date >= self.win_start_dt)
             ticker_data = ticker_data[mask]
-            print(ticker_data)
+
             _l_coin_ids = ticker_data.ID.unique()
             ''' loop through each operation to generate a colum of the measure '''
             for op_key in self.roll_calc_ops_dict.keys():
@@ -417,32 +418,29 @@ class ExtractLoadTransform():
                     coin_df.sort_values(by=['Date'], ascending=True, inplace=True)
                     ''' compute the rolling values for the period '''
                     if op_key == 'simp_move_avg':
-                        # coin_df['simp_move_avg'+'_'+self.roll_calc_ops_dict[op_key]]=\
                         coin_df[col_name]=\
                             coin_df[self.roll_calc_ops_dict[op_key]].rolling(self.roll_win_len,min_periods=1).mean()
                     elif op_key == 'simp_move_std':
-                        # coin_df['simp_move_std'+'_'+self.roll_calc_ops_dict[op_key]]=\
                         coin_df[col_name]=\
                             coin_df[self.roll_calc_ops_dict[op_key]].rolling(self.roll_win_len,min_periods=1).std()
                     elif op_key == 'simp_move_sum':
-                        # coin_df['simp_move_sum'+'_'+self.roll_calc_ops_dict[op_key]]=\
                         coin_df[col_name]=\
                             coin_df[self.roll_calc_ops_dict[op_key]].rolling(self.roll_win_len,min_periods=1).sum()
                     elif op_key == 'simp_cum_prod':
-                        # coin_df['simp_cum_prod'+'_'+self.roll_calc_ops_dict[op_key]]=\
                         coin_df[col_name]=\
                             coin_df[self.roll_calc_ops_dict[op_key]].rolling(self.roll_win_len,min_periods=1).sum()
                     elif op_key == 'momentum':
-                        # coin_df['momentum'+'_'+self.roll_calc_ops_dict[op_key]]=\
                         coin_df[col_name]=\
                             coin_df[self.roll_calc_ops_dict[op_key]].rolling(self.roll_win_len,min_periods=1).\
                                 apply(self.linreg_momentum,raw=False)
                     else:
                         pass
 
-                for _date in coin_df["Date"]:
-                    _value = coin_df.loc[coin_df['Date'] == _date, col_name].item()
-                    _rolling_df.loc[_rolling_df['Date']==_date, col_name] = _value
+                    if coin_df.shape[0] > 0:
+                        for _date in coin_df["Date"]:
+                            _value = coin_df.loc[coin_df['Date'] == _date, col_name].item()
+                            mask = (_rolling_df.Date == _date) & (_rolling_df.ID == c_id)
+                            _rolling_df.loc[mask, col_name] = _value
 
         except Exception as err:
             _s_fn_id = "Class <ExtractLoadTransform> Function <get_rolling_measures>"
@@ -490,9 +488,9 @@ class ExtractLoadTransform():
                 tmp_df = tmp_df.sort_values(by=['Date'])
 
                 for _date in tmp_df["Date"]:
-                    print(_date)
+#                     print(_date)
                     # _value = tmp_df.loc[tmp_df['Date'] == _date, value_col_name].item()
-                    print(tmp_df.loc[tmp_df['Date'] == _date])
+#                     print(tmp_df.loc[tmp_df['Date'] == _date])
                     _value = tmp_df.loc[tmp_df['Date'] == _date, value_col_name]
                     transfomed_df.loc[transfomed_df['Date']==_date, _s_coin_id] = _value
             # print(transfomed_df)
