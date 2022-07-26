@@ -130,19 +130,22 @@ class PortfolioPerformance():
             adx_df = ticker_data.copy()
             print(adx_df.columns)
             ''' Calculate the True range which is the log_ROR available in the input dataframe '''
-            if not 'ror' in adx_df.columns:
-                ''' Initialize class to calculate ror '''
-                import sys
-                # sys.path.insert(1, '../lib')
-                import clsETPreturns as returns
-                clsROR = returns.RateOfReturns(name="adxData")
-                adx_df = clsROR.get_logarithmic_returns(adx_df, value_col_name=value_col_name)
-                adx_df.dropna(axis=0, how='any', inplace=True)
+            ''' TODO fix the get ror to give an error and be a function outside of this function to compute ror'''
+#            if not 'ror' in adx_df.columns:
+            if not value_col_name in adx_df.columns:
+                raise ValueError("No data run function first")
+#                 ''' Initialize class to calculate ror '''
+#                 import sys
+#                 # sys.path.insert(1, '../lib')
+#                 import clsETPreturns as returns
+#                 clsROR = returns.RateOfReturns(name="adxData")
+#                 adx_df = clsROR.get_logarithmic_returns(adx_df, value_col_name=value_col_name)
+#                 adx_df.dropna(axis=0, how='any', inplace=True)
             ''' Positive Directional Movement --> log_ROR <= 1; else set to 0 '''
-            adx_df['+DM']=adx_df['ror']
+            adx_df['+DM']=adx_df[value_col_name]
             adx_df['+DM']=np.where(adx_df['+DM'] <= 0, adx_df['+DM'].abs(), 0)
             ''' Negative Directional Movement --> log_ROR > 1; else set to 0 '''
-            adx_df['-DM']=adx_df['ror']
+            adx_df['-DM']=adx_df[value_col_name]
             adx_df['-DM']=np.where(adx_df['-DM'] > 0, adx_df['-DM'].abs(), 0)
             ''' Smoothed values '''
             import sys
