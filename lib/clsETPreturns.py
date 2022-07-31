@@ -85,10 +85,12 @@ class RateOfReturns():
 #                weighted_return_arr = np.multiply(_top_asset_arr,weights)
                 weighted_return_arr = np.multiply(np.array(_top_assets_byDate_df[value_col_name]),weights)
                 ''' compute the market cap weighted sum '''
-                if 'market_cap' in _top_assets_byDate_df.columns:
-                    weighted_mc_returns = np.sum(np.multiply(np.array(_top_assets_byDate_df['market_cap']),weights))
                 sum_weighted_index = np.sum(weighted_return_arr, axis=1)
                 _max_weight_row = np.argmax(np.array(sum_weighted_index), axis=0)
+                if 'market_cap' in _top_assets_byDate_df.columns:
+#                     weighted_mc_returns = np.sum(np.multiply(np.array(_top_assets_byDate_df['market_cap']),weights))
+                    weighted_mc_returns = np.sum(np.multiply(np.array(_top_assets_byDate_df['market_cap']),
+                                                             weights[_max_weight_row]))
                 _l_exp_ret.append({
                                 'date' : _top_assets_byDate_df['Date'].max(),
                                 # 'date' : str(date.astype('datetime64[D]')),
@@ -106,7 +108,7 @@ class RateOfReturns():
             print("[Error]"+_s_fn_id, err)
             print(traceback.format_exc())
 
-        return _l_exp_ret
+        return pd.DataFrame(_l_exp_ret)
 
     ''' Function
             name: maximize_weights
